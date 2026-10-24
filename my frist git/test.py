@@ -163,6 +163,15 @@ def parse(src):
     return Parser(tokenize(src), src).parse()
 
 
+def parse_all(src):
+    """解析源码中的所有顶层表达式(一段代码可含多个表达式)。"""
+    p = Parser(tokenize(src), src)
+    exprs = []
+    while p.peek() is not None:
+        exprs.append(p.parse_expr())
+    return exprs
+
+
 # --------------------------------------------------------------------------- #
 # 环境
 # --------------------------------------------------------------------------- #
@@ -447,9 +456,15 @@ if __name__ == "__main__":
         for line in form.splitlines():
             if line.strip().startswith(";"):
                 print(f"\033[36m{line.strip()}\033[0m")
-            elif line.strip():
-                try:
-                    result, env = run(line, env)
+        code = "\n".join(
+            line for line in form.splitlines() if not line.strip().startswith(";")
+        )
+        if not code.strip():
+            continue
+        try:
+            for expr in parse_all(code):
+                result = evaluate(expr, env)
+                if result is not None:      # define/set!/defmacro 返回 None,不打印
                     print(f"  => {to_str(result)}")
-                except LispError as e:
-                    print(f"  !! {e}")                   
+        except LispError as e:
+            print(f"  !! {e}")

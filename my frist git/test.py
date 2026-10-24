@@ -452,6 +452,4 @@ if __name__ == "__main__":
                     result, env = run(line, env)
                     print(f"  => {to_str(result)}")
                 except LispError as e:
-                    print(f"  !! {e}")
-                    1111
-                    
+                    print(f"  !! {e}")                   
